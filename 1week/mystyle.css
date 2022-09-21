@@ -1,0 +1,28 @@
+* {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.wrap {
+    width: 250px;
+    margin: auto;
+    background-color: aqua;
+}
+
+.mytitle {
+    background-image: url("https://www.ancient-origins.net/sites/default/files/field/image/Agesilaus-II-cover.jpg");
+    background-position: center;
+    background-size: cover;
+    color: white;
+    text-align: center;
+    width: 250px;
+    height: 200px;
+    border-radius: 15%;
+    margin: auto;
+    padding-top: 50%;
+}
+
+.loginbtn {
+    display: block;
+    width: 100px;
+    margin: auto;
+}
