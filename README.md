@@ -1,8 +1,9 @@
 # Sparta Coding Club | 웹개발 종합반
-### [Notion 노트정리](https://private-carp-369.notion.site/9a162781ca274d6bb0f8b7daaba3d6d0)
-</br>
-</br>
 
+### [Notion 노트정리](https://private-carp-369.notion.site/9a162781ca274d6bb0f8b7daaba3d6d0)
+
+</br>
+</br>
 
 ## 1주차
 
@@ -39,16 +40,16 @@
 
     ![Untitled](https://user-images.githubusercontent.com/102138834/191512030-81d515a8-1a93-4810-9897-ab360de90869.png)</br>
 
-  - 결과
+- 결과
 
-    ![스크린샷 2022-09-20 19 05 43](https://user-images.githubusercontent.com/102138834/191512236-4941b184-7558-4a00-904d-ac34704d5e49.png)
+  ![스크린샷 2022-09-20 19 05 43](https://user-images.githubusercontent.com/102138834/191512236-4941b184-7558-4a00-904d-ac34704d5e49.png)
 
 </details>
 </br>
 </br>
 
+## 2주차
 
-##  2주차
 <details>
   <summary>전역변수와 지역변수를 간단히 이해하는 Javascript 홀/짝 클릭</summary>
 </br>
@@ -128,7 +129,7 @@
         // 2. 가져온 값을 이용해 names-q3에 붙일 태그를 만든다. (let temp_html = `<li>${txt}</li>`) 요렇게!
         // 3. 만들어둔 temp_html을 names-q3에 붙인다.(jQuery의 $('...').append(temp_html)을 이용하면 굿!)
 
-        let txt = $('#input-q3').val(); 
+        let txt = $('#input-q3').val();
         let temp_html = `<li>${txt}</li>`
         $('#names-q3').append(temp_html)
     }
@@ -145,91 +146,94 @@
 <details>
 <summary>Ajax</summary>
 
-  - Json과 GET에 대한 간단한 이해.
-  - 서울시 미세먼지 API를 활용하여 Ajax 통신을 연습함.
-  - Ajax + jQuery 조합 연습 - 서울시 미세먼지 API를 활용해 미세먼지 수치가 높은 곳을 구분해주기
-    </br>
-    
-    ```javascript
-      function q1() {
-      $('#names-q1').empty()
-      $.ajax({
-          type: "GET",
-          url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
-          data: {},
-          success: function (response) {
-              let rows = response['RealtimeCityAir']['row']
+- Json과 GET에 대한 간단한 이해.
+- 서울시 미세먼지 API를 활용하여 Ajax 통신을 연습함.
+- Ajax + jQuery 조합 연습 - 서울시 미세먼지 API를 활용해 미세먼지 수치가 높은 곳을 구분해주기
+  </br>
 
-              for (let i = 0; i < rows.length; i++) {
-                  let gu_name = rows[i]['MSRSTE_NM']
-                  let gu_mise = rows[i]['IDEX_MVL']
+  ```javascript
+  function q1() {
+    $("#names-q1").empty();
+    $.ajax({
+      type: "GET",
+      url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
+      data: {},
+      success: function (response) {
+        let rows = response["RealtimeCityAir"]["row"];
 
-                  let temp_html = ``
-                  if (gu_mise > 70) {
-                      temp_html = `<li class="bad">${gu_name} : ${gu_mise}</li>`
-                  } else {
-                      temp_html = `<li>${gu_name} : ${gu_mise}</li>`
-                  }
-                  $('#names-q1').append(temp_html)
-              }
+        for (let i = 0; i < rows.length; i++) {
+          let gu_name = rows[i]["MSRSTE_NM"];
+          let gu_mise = rows[i]["IDEX_MVL"];
+
+          let temp_html = ``;
+          if (gu_mise > 70) {
+            temp_html = `<li class="bad">${gu_name} : ${gu_mise}</li>`;
+          } else {
+            temp_html = `<li>${gu_name} : ${gu_mise}</li>`;
           }
-      })
-    }
-  - Ajax + jQuery 조합을 연습 - 서울시 따릉이 API를 활용해 남은 자전거 갯수가 낮은 곳을 구분해주기
-    </br>
-    
-    ```javascript
-      function q1() {
-      $('#names-q1').empty()
-      $.ajax({
-          type: "GET",
-          url: "http://spartacodingclub.shop/sparta_api/seoulbike",
-          data: {},
-          success: function (response) {
-              let rows = response['getStationList']['row']
+          $("#names-q1").append(temp_html);
+        }
+      },
+    });
+  }
+  ```
 
-              for (let i = 0; i < rows.length; i++) {
-                  let name = rows[i]['stationName']
-                  let rack = rows[i]['rackTotCnt']
-                  let bike = rows[i]['parkingBikeTotCnt']
+- Ajax + jQuery 조합을 연습 - 서울시 따릉이 API를 활용해 남은 자전거 갯수가 낮은 곳을 구분해주기
+  </br>
 
-                  let temp_html = ``
-                  if (bike < 5) {
-                      temp_html = `<tr class="urgent">
-                                      <td>${name}</td>
-                                      <td>${rack}</td>
-                                      <td>${bike}</td>
-                                  </tr>`
-                  } else {
-                      temp_html = `
-                                  <tr>
-                                      <td>${name}</td>
-                                      <td>${rack}</td>
-                                      <td>${bike}</td>
-                                  </tr>`
-                  }
+  ```javascript
+  function q1() {
+    $("#names-q1").empty();
+    $.ajax({
+      type: "GET",
+      url: "http://spartacodingclub.shop/sparta_api/seoulbike",
+      data: {},
+      success: function (response) {
+        let rows = response["getStationList"]["row"];
 
-                  $('#names-q1').append(temp_html)
-              }
+        for (let i = 0; i < rows.length; i++) {
+          let name = rows[i]["stationName"];
+          let rack = rows[i]["rackTotCnt"];
+          let bike = rows[i]["parkingBikeTotCnt"];
+
+          let temp_html = ``;
+          if (bike < 5) {
+            temp_html = `<tr class="urgent">
+                                    <td>${name}</td>
+                                    <td>${rack}</td>
+                                    <td>${bike}</td>
+                                </tr>`;
+          } else {
+            temp_html = `
+                                <tr>
+                                    <td>${name}</td>
+                                    <td>${rack}</td>
+                                    <td>${bike}</td>
+                                </tr>`;
           }
-      })
-    }
-  - Ajax + jQuery 조합을 연습 - 고양이 사진 API를 활용해 랜덤으로 고양이 사진을 불러오기
-    </br>
-    
-    ```javascript
-        function q1() {
-        $.ajax({
-            type: "GET",
-            url: "https://api.thecatapi.com/v1/images/search",
-            data: {},
-            success: function (response) {
-                let imgurl = response[0]['url']
-                $('#img-cat').attr('src', imgurl)
-            }
-        })
-    }
-</details>
+
+          $("#names-q1").append(temp_html);
+        }
+      },
+    });
+  }
+  ```
+
+- Ajax + jQuery 조합을 연습 - 고양이 사진 API를 활용해 랜덤으로 고양이 사진을 불러오기
+  </br>
+      ```javascript
+          function q1() {
+          $.ajax({
+              type: "GET",
+              url: "https://api.thecatapi.com/v1/images/search",
+              data: {},
+              success: function (response) {
+                  let imgurl = response[0]['url']
+                  $('#img-cat').attr('src', imgurl)
+              }
+          })
+      }
+  </details>
 
 <details>
 <summary>2주차 숙제</summary>
@@ -274,3 +278,63 @@
 </details>
 </br>
 </br>
+
+## 3주차
+
+<details>
+<summary>Ajax + jQuery 복습 : 나홀로 링크 메모장 완성하기</summary>
+  
+  - open API에서 데이터를 불러와서 띄워주기
+  - 버튼을 통한 메모장 열고 닫기
+    </br>
+    
+    ```javascript
+    $(document).ready(function () {
+        $('#cards-box').empty();
+        listing();
+    });
+
+    function listing() {
+        $.ajax({
+            type: "GET",
+            url: "http://spartacodingclub.shop/post",
+            data: {},
+            success: function (response) {
+                let rows = response['articles']
+                for (let i = 0; i < rows.length; i++) {
+                    let comment = rows[i]['comment']
+                    let desc = rows[i]['desc']
+                    let image = rows[i]['image']
+                    let title = rows[i]['title']
+                    let url = rows[i]['url']
+
+                    let temp_html = `<div class="card">
+                                        <img class="card-img-top"
+                                            src="${image}">
+                                        <div class="card-body">
+                                            <a href="${url}" class="card-title">${title}</a>
+                                            <p class="card-text">${desc}</p>
+                                            <p class="card-text comment">${comment}</p>
+                                        </div>
+                                    </div>`
+                    $('#card-box').append(temp_html)
+                }
+            }
+        })
+    }
+
+    function openclose() {
+        let status = $('#post-box').css('display');
+        if (status == 'block') {
+            $('#post-box').hide();
+            $('#btn-posting-box').text('포스팅 박스 열기');
+        } else {
+            $('#post-box').show();
+            $('#btn-posting-box').text('포스팅 박스 닫기');
+        }
+    }
+    ```
+
+- 결과
+
+</details>
