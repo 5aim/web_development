@@ -1586,8 +1586,284 @@
   - 페이지 로딩 후 하단에 주문자 목록이 자동으로 보여지도록
   
   <details>
-  <summary></summary>
+  <summary>index.html</summary>
+    <br>
+    
+	```html
+	<!doctype html>
+	<html lang="en">
+
+	<head>
+	    <!-- Required meta tags -->
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	    <!-- Bootstrap CSS -->
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	    <!-- Optional JavaScript -->
+	    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		crossorigin="anonymous"></script>
+
+	    <title>스파르타코딩클럽 | 부트스트랩 연습하기</title>
+
+	    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+	    <style>
+		* {
+		    font-family: 'Jua', sans-serif;
+		}
+
+		.item-img {
+		    width: 500px;
+		    height: 300px;
+
+		    margin: 30px auto 30px auto;
+		    background-image: url("https://t1.daumcdn.net/liveboard/nts/5bcccfbd33da4865817b9c606b6b852e.JPG");
+		    background-position: center;
+		    background-size: cover;
+		}
+
+		.price {
+		    font-size: 20px;
+		}
+
+		.item-desc {
+		    width: 500px;
+		    margin: 20px auto 20px auto;
+		}
+
+		.item-order {
+		    width: 500px;
+		    margin: 20px auto 70px auto;
+		}
+
+		.btn-order {
+		    margin: auto;
+		    width: 100px;
+
+		    display: block;
+		}
+
+		.wrap {
+		    width: 700px;
+		    margin: auto;
+		}
+
+		.rate {
+		    color: blue;
+		}
+	    </style>
+
+	    <script>
+		$(document).ready(function () {
+		    get_rate();
+		    listing();
+		});
+
+		function listing() {
+		    $.ajax({
+			type: "GET",
+			url: "/order",
+			data: {},
+			success: function (response) {
+			    if (response["result"] == "success") {
+				let orders = response['orders'];
+				for (let i = 0; i < orders.length; i++) {
+				    let name = orders[i]['name'];
+				    let count = orders[i]['count'];
+				    let address = orders[i]['address'];
+				    let phone = orders[i]['phone'];
+
+				    let temp_html = `<tr>
+							<th scope="row">${name}</th>
+							<td>${count}</td>
+							<td>${address}</td>
+							<td>${phone}</td>
+						    </tr>`
+				    $('#orders-box').append(temp_html)
+				}
+			    }
+			}
+		    })
+		}
+
+		function get_rate() {
+		    $.ajax({
+			type: "GET",
+			url: "https://api.manana.kr/exchange/rate.json",
+			data: {},
+			success: function (response) {
+			    let now_rate = response[1]['rate'];
+			    $('#now-rate').text(now_rate);
+			}
+		    })
+		}
+
+		function order() {
+		    let name = $('#order-name').val();
+		    let count = $('#order-count').val();
+		    let address = $('#order-address').val();
+		    let phone = $('#order-phone').val();
+
+		    $.ajax({
+			type: "POST",
+			url: "/order",
+			data: { name_give: name, count_give: count, address_give: address, phone_give: phone },
+			success: function (response) {
+			    if (response["result"] == "success") {
+				alert(response["msg"]);
+				window.location.reload();
+			    }
+			}
+		    })
+		}
+	    </script>
+	</head>
+
+	<body>
+	    <div class="wrap">
+		<div class="item-img"></div>
+		<div class="item-desc">
+		    <h1>양키캔들 미드썸머나잇</h1>
+		    <p class="blue">원달러 환율 : <span id="now-rate"></span></p>
+		    <span class="price">가격:26,900원/개</span>
+		    <p>머스크, 세이지, 마호가니코롱</p>
+		    <p>넓게 트인 여름밤의 시원한 느낌을 담은 향으로 남성들이 선호하는 멋스러운 향.</p>
+		</div>
+		<div class="item-order">
+		    <div class="input-group mb-3">
+			<div class="input-group-prepend">
+			    <span class="input-group-text">주문자이름</span>
+			</div>
+			<input type="text" id="order-name" class="form-control" aria-label="Default"
+			    aria-describedby="inputGroup-sizing-default">
+		    </div>
+		    <div class="input-group mb-3">
+			<div class="input-group-prepend">
+			    <label class="input-group-text" for="inputGroupSelect01">수량</label>
+			</div>
+			<select class="custom-select" id="order-count">
+			    <option selected>-- 수량을 선택하세요 --</option>
+			    <option value="1">1</option>
+			    <option value="2">2</option>
+			    <option value="3">3</option>
+			    <option value="4">4</option>
+			    <option value="5">5</option>
+			    <option value="6">6</option>
+			    <option value="7">7</option>
+			</select>
+		    </div>
+		    <div class="input-group mb-3">
+			<div class="input-group-prepend">
+			    <span class="input-group-text">주소</span>
+			</div>
+			<input id="order-address" type="text" class="form-control" aria-label="Default"
+			    aria-describedby="inputGroup-sizing-default">
+		    </div>
+		    <div class="input-group mb-3">
+			<div class="input-group-prepend">
+			    <span class="input-group-text">전화번호</span>
+			</div>
+			<input id="order-phone" type="text" class="form-control" aria-label="Default"
+			    aria-describedby="inputGroup-sizing-default">
+		    </div>
+		    <button type="button" onclick="order()" class="btn btn-primary btn-order">주문하기</button>
+		</div>
+		<table class="table">
+		    <thead>
+			<tr>
+			    <th scope="col">이름</th>
+			    <th scope="col">수량</th>
+			    <th scope="col">주소</th>
+			    <th scope="col">전화번호</th>
+			</tr>
+		    </thead>
+		    <tbody id="orders-box">
+		    </tbody>
+		</table>
+	    </div>
+	</body>
+
+	</html>
+	```
   
+  </details>
+  
+  <details>
+  <summary>app.py</summary>
+    <br>
+
+	```python
+	from flask import Flask, render_template, jsonify, request
+
+	app = Flask(__name__)
+
+	from pymongo import MongoClient
+
+	client = MongoClient('localhost', 27017)
+	db = client.dbhomework
+
+
+	## HTML 화면 보여주기
+	@app.route('/')
+	def homework():
+	    return render_template('index.html')
+
+
+	# 주문하기(POST) API
+	@app.route('/order', methods=['POST'])
+	def save_order():
+	    name_receive = request.form['name_give']
+	    count_receive = request.form['count_give']
+	    address_receive = request.form['address_give']
+	    phone_receive = request.form['phone_give']
+
+	    doc = {
+		'name': name_receive,
+		'count': count_receive,
+		'address': address_receive,
+		'phone': phone_receive
+	    }
+	    db.orders.insert_one(doc)
+
+	    return jsonify({'result': 'success', 'msg': '주문 완료!'})
+
+
+	# 주문 목록보기(Read) API
+	@app.route('/order', methods=['GET'])
+	def view_orders():
+	    orders = list(db.orders.find({}, {'_id': False}))
+	    return jsonify({'result': 'success', 'orders': orders})
+
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5001, debug=True)
+	```
+  </details>
+  
+  <details>
+  <summary>홈페이지</summary>
+    <br>
+    
+    ![스크린샷 2022-10-11 22 27 48](https://user-images.githubusercontent.com/102138834/195104810-09756398-8d62-4375-8d34-3b8b291aa2e3.png)
+
+  
+  </details>
+  
+  <details>
+  <summary>DB</summary>
+    <br>
+  
+    <img width="823" alt="스크린샷 2022-10-11 22 30 59" src="https://user-images.githubusercontent.com/102138834/195104826-f9a9b8c6-37c4-4ff7-b334-ce75413bf2fa.png">
+
   
   </details>
 
