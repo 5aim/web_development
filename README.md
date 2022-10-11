@@ -981,6 +981,59 @@
 ## 4주차
 
 <details>
-<summary></summary>
+<summary>Flask 시작하기</summary>
 
+- render_template
+
+  - flask 프레임워크의 Jinja2 템플릿엔진을 사용하여 render_template()함수를 이용하여 HTML을 렌더링해보자
+  
+    ```python
+    from flask import Flask, render_template, request, jsonify
+    app = Flask(__name__)
+    ```
+  
+- Flask API GET, POST 연습해보기 
+
+  - GET
+  
+    ```python
+    @app.route('/test', methods=['GET'])
+    def test_get():
+      title_receive = request.args.get('title_give')
+      print(title_receive)
+      return jsonify({'result':'success', 'msg': '이 요청은 GET!'})
+    ```
+  
+    ```javascript
+    $.ajax({
+      type: "GET",
+      url: "/test?title_give=봄날은간다",
+      data: {},
+      success: function(response){
+         console.log(response)
+      }
+    })
+    ```
+  
+  - POST
+  
+    ```python
+    @app.route('/test', methods=['POST'])
+    def test_post():
+      title_receive = request.form['title_give']
+      print(title_receive)
+      return jsonify({'result':'success', 'msg': '이 요청은 POST!'})
+    ```
+    
+    ```javascript
+    $.ajax({
+      type: "POST",
+      url: "/test",
+      data: { title_give:'수리남' },
+      success: function(response){
+         console.log(response)
+      }
+    })
+    ```
+    
 </details>
