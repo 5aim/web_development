@@ -1330,8 +1330,265 @@
 
 - 들어가기 전
 
-  - meta tag 스크롤링을 통한 데이터를 DB에 저장하고 이를 활용해 나만의 영화 리뷰 메모장을 만든다
+  - meta tag 스크롤링을 통한 데이터를 DB에 저장하고 이를 활용해 나만의 영화 리뷰 메모장을 만든다.
   
-  - 
+    - meta tag 스크롤링하는 beautifulsoup의 새로운 크롤링 방식에 대해 익힌다.
+  
+  - Flask를 통해서 개발 순서를 머릿속으로 익히고 배운다.
+  
+    - 클라이언트와 서버가 잘 연결되어 있는지 확인하기
+    
+    - 서버 만들기
+    
+    - 클라이언트 만들기
+    
+    - 완성 확인하기
+    
+  - POST, GET 연습을 통해 코드를 익힌다.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - Ajax와 jQuery의 조합에 대한 사용법을 숙지한다.
+  
+    - 스크롤링한 데이터를 받아서 db에 insert하고
+    
+    - 모든 데이터를 find, HTML에 append.
+    
+  <details>
+  <summary>index.html</summary>
+    <br>
+    
+	```html
+	<!Doctype html>
+	<html lang="ko">
+
+	<head>
+	    <!-- Required meta tags -->
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	    <!-- Bootstrap CSS -->
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	    <!-- JS -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+
+	    <!-- 구글폰트 -->
+	    <link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet">
+
+
+	    <title>영화리뷰 메모장</title>
+
+	    <!-- style -->
+	    <style type="text/css">
+		* {
+		    font-family: "Stylish", sans-serif;
+		}
+
+		.wrap {
+		    width: 900px;
+		    margin: auto;
+		}
+
+		.comment {
+		    color: blue;
+		    font-weight: bold;
+		}
+
+		#post-box {
+		    width: 500px;
+		    margin: 20px auto;
+		    padding: 50px;
+		    border: black solid;
+		    border-radius: 5px;
+		}
+	    </style>
+	    <script>
+		$(document).ready(function () {
+		    showArticles();
+		});
+
+		function openClose() {
+		    if ($("#post-box").css("display") == "block") {
+			$("#post-box").hide();
+			$("#btn-post-box").text("포스팅 작성하기");
+		    } else {
+			$("#post-box").show();
+			$("#btn-post-box").text("포스팅 박스 닫기");
+		    }
+		}
+
+		function postArticle() {
+		    let url = $('#post-url').val()
+		    let comment = $('#post-comment').val()
+
+		    $.ajax({
+			type: "POST",
+			url: "/memo",
+			data: {url_give:url, comment_give:comment},
+			success: function (response) { // 성공하면
+			    alert(response["msg"]);
+			    window.location.reload()
+			}
+		    })
+		}
+
+		function showArticles() {
+		    $.ajax({
+			type: "GET",
+			url: "/memo?sample_give=샘플데이터",
+			data: {},
+			success: function (response) {
+			    let articles = response['all_articles']
+
+			    for (let i = 0; i < articles.length; i++) {
+				let title = articles[i]['title']
+				let image = articles[i]['image']
+				let url = articles[i]['url']
+				let desc = articles[i]['desc']
+				let comment = articles[i]['comment']
+
+				let temp_html = `<div class="card">
+						    <img class="card-img-top"
+							src="${image}"
+							alt="Card image cap">
+						    <div class="card-body">
+							<a target="_blank" href="${url}" class="card-title">${title}</a>
+							<p class="card-text">${desc}</p>
+							<p class="card-text comment">${comment}</p>
+						    </div>
+						</div>`
+
+				$('#cards-box').append(temp_html)
+			    }
+			}
+		    })
+		}
+	    </script>
+
+	</head>
+
+	<body>
+	    <div class="wrap">
+		<div class="jumbotron">
+		    <h1 class="display-4">NAVER 영화 링크 메모장!</h1>
+		    <p class="lead">재밌게 본 영화의 NAVER 링크를 저장해두고, 기록할 수 있는 나만의 영화리뷰 공간</p>
+		    <hr class="my-4">
+		    <p class="lead">
+			<button onclick="openClose()" id="btn-post-box" type="button" class="btn btn-primary">포스팅 작성하기
+			</button>
+		    </p>
+		</div>
+		<div id="post-box" class="form-post" style="display:none">
+		    <div>
+			<div class="form-group">
+			    <label for="post-url">아티클 URL</label>
+			    <input id="post-url" class="form-control" placeholder="">
+			</div>
+			<div class="form-group">
+			    <label for="post-comment">간단 코멘트</label>
+			    <textarea id="post-comment" class="form-control" rows="2"></textarea>
+			</div>
+			<button type="button" class="btn btn-primary" onclick="postArticle()">기사저장</button>
+		    </div>
+		</div>
+		<div id="cards-box" class="card-columns">
+		</div>
+	    </div>
+	</body>
+
+	</html>
+	```
+  
+  </details>
+  
+  <details>
+  <summary>app.py</summary>
+    <br>
+
+	```python
+	from flask import Flask, render_template, jsonify, request
+	app = Flask(__name__)
+
+	import requests
+	from bs4 import BeautifulSoup
+
+	from pymongo import MongoClient
+	client = MongoClient('localhost', 27017)
+	db = client.linkmemo
+
+
+	## HTML을 주는 부분
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+
+	@app.route('/memo', methods=['GET'])
+	def listing():
+	    articles = list(db.linkmemo.find({}, {'_id':False}))
+	    return jsonify({'all_articles':articles})
+
+
+	## API 역할을 하는 부분
+	@app.route('/memo', methods=['POST'])
+	def saving():
+	    url_receive = request.form['url_give']
+	    comment_receive = request.form['comment_give']
+
+	    # data에 url receive를 받기 때문에 아래와 같이 따로 써 줄 필요가 없다.
+	    # url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=81888' 탑건 메버릭 url
+
+	    headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+	    data = requests.get(url_receive, headers=headers)
+
+	    soup = BeautifulSoup(data.text, 'html.parser')
+
+	    og_title = soup.select_one('meta[property="og:title"]')['content']
+	    og_image = soup.select_one('meta[property="og:image"]')['content']
+	    og_description = soup.select_one('meta[property="og:description"]')['content']
+
+	    doc = {
+		'title':og_title,
+		'image':og_image,
+		'desc':og_description,
+		'url':url_receive,
+		'comment':comment_receive
+	    }
+
+	    db.linkmemo.insert_one(doc)
+
+	    return jsonify({'msg':'포스팅을 완료하였습니다'})
+
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0',port=5001,debug=True)
+	```
+  
+  </details>
+
+
+</details>
+
+
+
+<details>
+<summary>4주차 숙제</summary>
+
+- 1주차에 완성한 쇼핑몰에 두 가지 기능을 추가해서 완성하기
+
+  - 정보를 입력 후 주문하기를 클릭하면 주문 목록에 데이터가 추가
+  
+  - 페이지 로딩 후 하단에 주문자 목록이 자동으로 보여지도록
+  
+  <details>
+  <summary></summary>
+  
+  
+  </details>
 
 </details>
