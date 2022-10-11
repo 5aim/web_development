@@ -1037,3 +1037,301 @@
     ```
     
 </details>
+
+<details>
+<summary>'책 리뷰' 미니 프로젝트</summary>
+
+- 들어가기 전
+
+  - Flask를 통해서 개발 순서를 머릿속으로 익히고 배운다.
+  
+    - 클라이언트와 서버가 잘 연결되어 있는지 확인하기
+    
+    - 서버 만들기
+    
+    - 클라이언트 만들기
+    
+    - 완성 확인하기
+    
+  - POST, GET 연습을 통해 코드를 익힌다.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - Ajax와 jQuery의 조합에 대한 사용법을 숙지한다.
+  
+    - title, author, review의 데이터를 받아서 db에 insert하고
+    
+    - 모든 데이터를 find, HTML에 append.
+  
+  <details>
+  <summary>index.html</summary>
+    <br>
+    
+	```html
+	<!DOCTYPE html>
+	<html lang="ko">
+
+	<head>
+	<!-- Webpage Title -->
+	<title>Flask 책리뷰 연습하기</title>
+
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<!-- JS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+	integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+	crossorigin="anonymous"></script>
+
+	<!-- 구글폰트 -->
+	<link href="https://fonts.googleapis.com/css?family=Do+Hyeon&display=swap" rel="stylesheet">
+
+	<script type="text/javascript">
+
+	$(document).ready(function () {
+	    showReview();
+	});
+
+	// 리뷰 저장하기
+	function makeReview() {
+	    // #id에 해당하는 .val() value값을 let 변수명으로 받아라
+	    let title = $('#title').val()
+	    let author = $('#author').val()
+	    let review = $('#bookReview').val()
+
+	    // 위에서 받은 변수들을 ajax post로 받은 데이터들을 받아서 서버에 보내줘라.
+	    $.ajax({
+		type: "POST",
+		url: "/review",
+		data: { title_give: title, author_give: author, review_give: review },
+		success: function (response) {
+		    alert(response["msg"]);
+		    window.location.reload();
+		}
+	    })
+	}
+
+	// 리뷰 띄워주기
+	function showReview() {
+	    $.ajax({
+		type: "GET",
+		url: "/review",
+		data: {},
+		success: function (response) {
+		    // reviews에 서버에서 보낸 all_review를 받아내고
+		    let reviews = response['all_reviews']
+
+		    // 반복문을 돌려서 모든 데이터를 변수 지정해서 꺼낸 다음에
+		    for (let i = 0; i < reviews.length; i++) {
+			let title = reviews[i]['title']
+			let author = reviews[i]['author']
+			let review = reviews[i]['review']
+
+			// html에 append한다.
+			let temp_html = `<tr>
+					    <td>${title}</td>
+					    <td>${author}</td>
+					    <td>${review}</td>
+					</tr>`
+
+			$('#reviews-box').append(temp_html)
+		    }
+		}
+	    })
+	}
+	</script>
+
+	<style type="text/css">
+	* {
+	    font-family: "Do Hyeon", sans-serif;
+	}
+
+	h1,
+	h5 {
+	    display: inline;
+	}
+
+	.wrap {
+	    margin: auto;
+	    width: 100%;
+	}
+
+	.main-image {
+	    width: 800px;
+	    height: 600px;
+	    margin: auto;
+	}
+
+	.info {
+	    margin: 20px auto 20px auto;
+	    width: 500px;
+	}
+
+	.review-btn {
+	    text-align: center;
+	}
+
+	.reviews {
+	    margin: 70px auto 70px auto;
+	    width: 800px;
+	}
+
+	.title {
+	    width: 200px;
+	}
+
+	.author {
+	    width: 100px;
+	}
+
+	.review-content {
+	    width: 700px;
+	}
+	</style>
+	</head>
+
+	<body>
+	<div class="container">
+	<div class="main-image">
+	    <img src="https://previews.123rf.com/images/maxxyustas/maxxyustas1511/maxxyustas151100002/47858355-education-concept-books-and-textbooks-on-the-bookshelf-3d.jpg"
+		class="img-fluid" alt="Responsive image">
+	</div>
+	<div class="info">
+	    <h1>읽은 책에 대해 리뷰를 남겨보자.</h1>
+	    <p>내가 읽은 책의 제목과 그 책의 저자, 나의 개인적인 리뷰를 남기는 공간</p>
+	    <div class="input-group mb-3">
+		<div class="input-group-prepend">
+		    <span class="input-group-text">책제목</span>
+		</div>
+		<input type="text" class="form-control" id="title">
+	    </div>
+	    <div class="input-group mb-3">
+		<div class="input-group-prepend">
+		    <span class="input-group-text">저자</span>
+		</div>
+		<input type="text" class="form-control" id="author">
+	    </div>
+	    <div class="input-group mb-3">
+		<div class="input-group-prepend">
+		    <span class="input-group-text">리뷰</span>
+		</div>
+		<textarea class="form-control" id="bookReview" cols="30" rows="5"
+		    placeholder="140자까지 입력할 수 있습니다."></textarea>
+	    </div>
+	    <div class="review-btn">
+		<button onclick="makeReview()" type="button" class="btn btn-primary">리뷰 작성하기</button>
+	    </div>
+	</div>
+	<div class="reviews">
+	    <table class="table">
+		<thead>
+		    <tr>
+			<th scope="col" class="title">책 제목</th>
+			<th scope="col" class="author">저자</th>
+			<th scope="col" class="review-content">리뷰</th>
+		    </tr>
+		</thead>
+		<tbody id="reviews-box">
+		</tbody>
+	    </table>
+	</div>
+	</div>
+	</body>
+
+	</html>
+	```
+
+  </details>
+  
+  <details>
+  <summary>app.py</summary>
+    <br>
+    
+	```python
+	from flask import Flask, render_template, jsonify, request
+	app = Flask(__name__)
+
+
+	# mongoDB
+	from pymongo import MongoClient
+	client = MongoClient('localhost', 27017)
+	db = client.bookreview
+
+
+	## HTML을 주는 부분
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+
+	## API 역할을 하는 부분
+	@app.route('/review', methods=['POST'])
+	def write_review():
+	    title_receive = request.form['title_give']
+	    author_receive = request.form['author_give']
+	    review_receive = request.form['review_give']
+
+	    ## 딕셔너리를 하나 만들고
+	    doc = {
+		'title': title_receive,
+		'author': author_receive,
+		'review': review_receive
+	    }
+
+	    # bookreview collection 으로 insert 해라.
+	    db.bookreview.insert_one(doc)
+
+	    return jsonify({'msg': '리뷰를 남겼습니다'})
+
+
+	@app.route('/review', methods=['GET'])
+	def read_reviews():
+	    # db bookreview에서 모든 데이터를 find하고 reviews에 담고
+	    reviews = list(db.bookreview.find({}, {'_id':False}))
+
+	    # json형식으로 reviews를 all reviews로 return한다.
+	    return jsonify({'all_reviews': reviews})
+
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5001, debug=True)
+	```
+  
+  </details>
+  
+  <details>
+  <summary>홈페이지 사진</summary>
+    <br>
+    
+    ![스크린샷 2022-10-11 20 58 16](https://user-images.githubusercontent.com/102138834/195085350-6bc16a9d-26a5-4ac2-b6da-6d142f2cb2c2.png)
+    
+  
+  </details>
+  
+  <details>
+  <summary>DB</summary>
+    <br>
+    
+    <img width="596" alt="스크린샷 2022-10-11 20 58 38" src="https://user-images.githubusercontent.com/102138834/195085515-d2d854c5-4ba1-41af-8c5c-cd3fedc83726.png">
+
+  
+  </details>
+
+</details>
+
+<details>
+<summary>'영화 링크 메모장' 미니 프로젝트</summary>
+
+- 들어가기 전
+
+  - meta tag 스크롤링을 통한 데이터를 DB에 저장하고 이를 활용해 나만의 영화 리뷰 메모장을 만든다
+  
+  - 
+
+</details>
