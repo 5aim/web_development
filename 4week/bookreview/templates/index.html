@@ -39,7 +39,7 @@
             $.ajax({
                 type: "POST",
                 url: "/review",
-                data: {title_give:title, author_give:author, review_give:review},
+                data: { title_give: title, author_give: author, review_give: review },
                 success: function (response) {
                     alert(response["msg"]);
                     window.location.reload();
@@ -87,31 +87,57 @@
             display: inline;
         }
 
-        .info {
-            margin-top: 20px;
-            margin-bottom: 20px;
+        .wrap {
+            margin: auto;
+            width: 100%;
         }
 
-        .review {
+        .main-image {
+            width: 800px;
+            height: 600px;
+            margin: auto;
+        }
+
+        .info {
+            margin: 20px auto 20px auto;
+            width: 500px;
+        }
+
+        .review-btn {
             text-align: center;
         }
 
         .reviews {
-            margin-top: 100px;
+            margin: 70px auto 70px auto;
+            width: 800px;
+        }
+
+        .title {
+            width: 200px;
+        }
+
+        .author {
+            width: 100px;
+        }
+
+        .review-content {
+            width: 700px;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <img src="https://previews.123rf.com/images/maxxyustas/maxxyustas1511/maxxyustas151100002/47858355-education-concept-books-and-textbooks-on-the-bookshelf-3d.jpg"
-            class="img-fluid" alt="Responsive image">
+        <div class="main-image">
+            <img src="https://previews.123rf.com/images/maxxyustas/maxxyustas1511/maxxyustas151100002/47858355-education-concept-books-and-textbooks-on-the-bookshelf-3d.jpg"
+                class="img-fluid" alt="Responsive image">
+        </div>
         <div class="info">
-            <h1>읽은 책에 대해 말씀해주세요.</h1>
-            <p>다른 사람을 위해 리뷰를 남겨주세요! 다 같이 좋은 책을 읽는다면 다 함께 행복해질 수 있지 않을까요?</p>
+            <h1>읽은 책에 대해 리뷰를 남겨보자.</h1>
+            <p>내가 읽은 책의 제목과 그 책의 저자, 나의 개인적인 리뷰를 남기는 공간</p>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">제목</span>
+                    <span class="input-group-text">책제목</span>
                 </div>
                 <input type="text" class="form-control" id="title">
             </div>
@@ -128,7 +154,7 @@
                 <textarea class="form-control" id="bookReview" cols="30" rows="5"
                     placeholder="140자까지 입력할 수 있습니다."></textarea>
             </div>
-            <div class="review">
+            <div class="review-btn">
                 <button onclick="makeReview()" type="button" class="btn btn-primary">리뷰 작성하기</button>
             </div>
         </div>
@@ -136,9 +162,9 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">제목</th>
-                        <th scope="col">저자</th>
-                        <th scope="col">리뷰</th>
+                        <th scope="col" class="title">책 제목</th>
+                        <th scope="col" class="author">저자</th>
+                        <th scope="col" class="review-content">리뷰</th>
                     </tr>
                 </thead>
                 <tbody id="reviews-box">

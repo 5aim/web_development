@@ -15,18 +15,26 @@ def home():
 
 
 # API 역할을 하는 부분
+# GET
 @app.route('/api/list', methods=['GET'])
 def show_stars():
     movie_star = list(db.mystar.find({}, {'_id':False}).sort('like',-1))
-    # sort : like 역순으로 불러와줌. pymongo에서 정렬에서 데이터를 뽑아줌.
+    # sort : pymongo에서 데이터를 정렬해서 데이터를 뽑아줌.
     return jsonify({'movie_stars': movie_star})
 
 
 @app.route('/api/like', methods=['POST'])
 def like_star():
-    sample_receive = request.form['sample_give']
-    print(sample_receive)
-    return jsonify({'msg': 'like 연결되었습니다!'})
+    name_receive = request.form['name_give']
+    
+    target_star = db.mystar.find_one({'name': name_receive})
+    current_like = target_star['like']
+
+    new_like = current_like + 1
+
+    db.mystar.update_one({'name': name_receive}, {'$set': {'like': new_like}})
+
+    return jsonify({'msg': '좋아요!'})
 
 
 @app.route('/api/delete', methods=['POST'])

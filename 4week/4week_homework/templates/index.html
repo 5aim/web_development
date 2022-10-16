@@ -20,20 +20,21 @@
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 
-    <title>스파르타코딩클럽 | 2주차 숙제</title>
+    <title>스파르타코딩클럽 | 부트스트랩 연습하기</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 
     <style>
         * {
-            font-family: 'Gothic A1', sans-serif;
+            font-family: 'Jua', sans-serif;
         }
 
         .item-img {
-            width: 400px;
-            height: 700px;
-            margin: auto;
-            background-image: url("https://mitrashop.co.kr/web/product/big/20200522/23212d5a393a11c4e5657ef40f4daf3f.jpg");
+            width: 500px;
+            height: 300px;
+
+            margin: 30px auto 30px auto;
+            background-image: url("https://t1.daumcdn.net/liveboard/nts/5bcccfbd33da4865817b9c606b6b852e.JPG");
             background-position: center;
             background-size: cover;
         }
@@ -44,12 +45,12 @@
 
         .item-desc {
             width: 500px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin: 20px auto 20px auto;
         }
 
         .item-order {
             width: 500px;
+            margin: 20px auto 70px auto;
         }
 
         .btn-order {
@@ -60,37 +61,78 @@
         }
 
         .wrap {
-            padding-top: 30px;
-            width: 500px;
+            width: 700px;
             margin: auto;
         }
 
-        .blue {
+        .rate {
             color: blue;
         }
     </style>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             get_rate();
+            listing();
         });
 
-        function get_rate(){
+        function listing() {
             $.ajax({
                 type: "GET",
-                url: "http://spartacodingclub.shop/sparta_api/rate",
+                url: "/order",
                 data: {},
                 success: function (response) {
-                    let now_rate = response['rate'];
+                    if (response["result"] == "success") {
+                        let orders = response['orders'];
+                        for (let i = 0; i < orders.length; i++) {
+                            let name = orders[i]['name'];
+                            let count = orders[i]['count'];
+                            let address = orders[i]['address'];
+                            let phone = orders[i]['phone'];
+
+                            let temp_html = `<tr>
+                                                <th scope="row">${name}</th>
+                                                <td>${count}</td>
+                                                <td>${address}</td>
+                                                <td>${phone}</td>
+                                            </tr>`
+                            $('#orders-box').append(temp_html)
+                        }
+                    }
+                }
+            })
+        }
+
+        function get_rate() {
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let now_rate = response[1]['rate'];
                     $('#now-rate').text(now_rate);
                 }
             })
         }
 
         function order() {
-            alert('주문이 완료되었습니다!');
-        }
+            let name = $('#order-name').val();
+            let count = $('#order-count').val();
+            let address = $('#order-address').val();
+            let phone = $('#order-phone').val();
 
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: { name_give: name, count_give: count, address_give: address, phone_give: phone },
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        alert(response["msg"]);
+                        window.location.reload();
+                    }
+                }
+            })
+        }
     </script>
 </head>
 

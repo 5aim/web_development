@@ -61,5 +61,5 @@ def insert_all():
         insert_star(url)
 
 
-### 실행하기
+# 실행하기
 insert_all()

@@ -66,7 +66,7 @@
                                             </div>
                                             <footer class="card-footer">
                                                 <a href="#" onclick="likeStar('${name}')" class="card-footer-item has-text-info">
-                                                    위로!
+                                                    좋아요
                                                     <span class="icon">
                                                         <i class="fas fa-thumbs-up"></i>
                                                     </span>
@@ -89,9 +89,10 @@
             $.ajax({
                 type: 'POST',
                 url: '/api/like',
-                data: { sample_give: '샘플데이터' },
+                data: { name_give:name },
                 success: function (response) {
                     alert(response['msg']);
+                    window.location.reload()
                 }
             });
         }
