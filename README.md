@@ -1868,3 +1868,341 @@
   </details>
 
 </details>
+</br>
+</br>
+
+## 5주차
+
+<details>
+<summary>'my favorite movie star' 미니 프로젝트</summary>
+
+- 들어가기 전
+
+  - Ajax와 jQuery의 조합에 대한 Read, Update, Delete를 배운다.
+  
+  - Flask를 통해서 개발 순서를 머릿속으로 익히고 배운다.
+  
+    - 클라이언트와 서버가 잘 연결되어 있는지 확인하기
+    
+    - 서버 만들기
+    
+    - 클라이언트 만들기
+    
+    - 완성 확인하기
+    
+  - POST, GET 연습을 통해 코드를 익힌다.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+  
+  </br>  
+  <details>
+  <summary>만들 API</summary>
+  
+    - Read : 데이터 정보 전체 조회
+    
+    - Update : 좋아요 기능
+  
+    - Delete : 배우의 데이터 삭제
+  
+  </details>
+
+  <details>
+  <summary>배우 데이터 적립을 위한 스크롤링</summary>
+  
+    - 영화배우와 영화, 이미지, url, 최근작품, 좋아요의 데이터를 스크롤링해서 mongoDB에 넣는다.
+    
+        ```python
+		import requests
+		from bs4 import BeautifulSoup
+
+		from pymongo import MongoClient
+
+		client = MongoClient('localhost', 27017)
+		db = client.mystar
+
+		# DB에 저장할 영화인들의 출처 url을 가져옵니다.
+		def get_urls():
+		    headers = {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+		    data = requests.get('https://movie.naver.com/movie/sdb/rank/rpeople.nhn', headers=headers)
+
+		    soup = BeautifulSoup(data.text, 'html.parser')
+
+		    trs = soup.select('#old_content > table > tbody > tr')
+
+		    urls = []
+		    for tr in trs:
+			a = tr.select_one('td.title > a')
+			if a is not None:
+			    base_url = 'https://movie.naver.com/'
+			    url = base_url + a['href']
+			    urls.append(url)
+
+		    return urls
+
+		# 출처 url로부터 영화인들의 사진, 이름, 최근작 정보를 가져오고 mystar 콜렉션에 저장합니다.
+		def insert_star(url):
+		    headers = {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+		    data = requests.get(url, headers=headers)
+
+		    soup = BeautifulSoup(data.text, 'html.parser')
+
+		    name = soup.select_one('#content > div.article > div.mv_info_area > div.mv_info.character > h3 > a').text
+		    img_url = soup.select_one('#content > div.article > div.mv_info_area > div.poster > img')['src']
+		    recent_work = soup.select_one(
+			'#content > div.article > div.mv_info_area > div.mv_info.character > dl > dd > a:nth-child(1)').text
+
+		    doc = {
+			'name': name,
+			'img_url': img_url,
+			'recent': recent_work,
+			'url': url,
+			'like': 0
+		    }
+
+		    db.mystar.insert_one(doc)
+		    print('완료!', name)
+
+		# 기존 mystar 콜렉션을 삭제하고, 출처 url들을 가져온 후, 크롤링하여 DB에 저장합니다.
+		def insert_all():
+		    db.mystar.drop()  # mystar 콜렉션을 모두 지워줍니다.
+		    urls = get_urls()
+		    for url in urls:
+			insert_star(url)
+
+		### 실행하기
+		insert_all()
+        ```
+
+  </details>
+  
+  <details>
+  <summary>app.py</summary>
+
+    - sort함수를 사용해 좋아요 순으로 정렬하고, 좋아요 버튼 클릭시 데이터를 수정하는 방법에 대해 배움.
+  
+      ```python
+		from pymongo import MongoClient
+
+		from flask import Flask, render_template, jsonify, request
+
+		app = Flask(__name__)
+
+		client = MongoClient('localhost', 27017)
+		db = client.mystar
+
+
+		# HTML 화면 보여주기
+		@app.route('/')
+		def home():
+		    return render_template('index.html')
+
+
+		# API 역할을 하는 부분
+		# GET
+		@app.route('/api/list', methods=['GET'])
+		def show_stars():
+		    movie_star = list(db.mystar.find({}, {'_id':False}).sort('like',-1))
+		    # sort : pymongo에서 데이터를 정렬해서 데이터를 뽑아줌.
+		    return jsonify({'movie_stars': movie_star})
+
+
+		@app.route('/api/like', methods=['POST'])
+		def like_star():
+		    name_receive = request.form['name_give']
+		    # 이름을 받아오고
+
+		    target_star = db.mystar.find_one({'name': name_receive})
+		    current_like = target_star['like']
+		    # 받아온 이름에서 맞는 target_star 하나를 찾아주고 그 target_star의 like를 current_like로 받는다.
+
+		    new_like = current_like + 1
+		    # 찾은 target_star의 current_like를 하나 올려서 new_like로 받고
+
+		    db.mystar.update_one({'name': name_receive}, {'$set': {'like': new_like}})
+		    # db에 POST하는데 name이 위에서 받아온 name_receive인 것의 like를 new_like로 바꾼다.
+
+		    return jsonify({'msg': '좋아요!'})
+
+
+		@app.route('/api/delete', methods=['POST'])
+		def delete_star():
+		    name_receive = request.form['name_give']
+
+		    db.mystar.delete_one({'name':name_receive})
+
+		    return jsonify({'msg': '영화인을 삭제했습니다.'})
+
+
+		if __name__ == '__main__':
+		    app.run('0.0.0.0', port=5001, debug=True)
+      ```
+  
+  </details>
+
+  <details>
+  <summary>index.html</summary>
+
+    - Ajax, jQuery
+  
+      ```html
+		<!DOCTYPE html>
+		<html lang="ko">
+
+		<head>
+		    <meta charset="UTF-8" />
+		    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		    <title>My Favorite movie star</title>
+		    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" />
+		    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+		    <style>
+			.center {
+			    text-align: center;
+			}
+
+			.star-list {
+			    width: 500px;
+			    margin: 20px auto 0 auto;
+			}
+
+			.star-name {
+			    display: inline-block;
+			}
+
+			.star-name:hover {
+			    text-decoration: underline;
+			}
+
+			.card {
+			    margin-bottom: 15px;
+			}
+		    </style>
+		    <script>
+			$(document).ready(function () {
+			    showStar();
+			});
+
+			function showStar() {
+			    $.ajax({
+				type: 'GET',
+				url: '/api/list?sample_give=샘플데이터',
+				data: {},
+				success: function (response) {
+				    let mystars = response['movie_stars']
+				    for (let i = 0; i < mystars.length; i++) {
+					let name = mystars[i]['name']
+					let img_url = mystars[i]['img_url']
+					let recent = mystars[i]['recent']
+					let url = mystars[i]['url']
+					let like = mystars[i]['like']
+
+					let temp_html = `<div class="card">
+							    <div class="card-content">
+								<div class="media">
+								    <div class="media-left">
+									<figure class="image is-48x48">
+									    <img src="${img_url}"
+										alt="Placeholder image" />
+									</figure>
+								    </div>
+								    <div class="media-content">
+									<a href="${url}" target="_blank" class="star-name title is-4">${name} (좋아요: ${like})</a>
+									<p class="subtitle is-6">최신작 : ${recent}</p>
+								    </div>
+								</div>
+							    </div>
+							    <footer class="card-footer">
+								<a href="#" onclick="likeStar('${name}')" class="card-footer-item has-text-info">
+								    좋아요
+								    <span class="icon">
+									<i class="fas fa-thumbs-up"></i>
+								    </span>
+								</a>
+								<a href="#" onclick="deleteStar('${name}')" class="card-footer-item has-text-danger">
+								    삭제
+								    <span class="icon">
+									<i class="fas fa-ban"></i>
+								    </span>
+								</a>
+							    </footer>
+							</div>`
+					$('#star-box').append(temp_html)
+				    }
+				}
+			    });
+			}
+
+			function likeStar(name) {
+			    $.ajax({
+				type: 'POST',
+				url: '/api/like',
+				data: { name_give:name },
+				success: function (response) {
+				    // 좋아요 메세지를 띄워주고 윈도우를 reload한다.
+				    alert(response['msg']);
+				    window.location.reload()
+				}
+			    });
+			}
+
+			function deleteStar(name) {
+			    $.ajax({
+				type: 'POST',
+				url: '/api/delete',
+				data: { name_give:name },
+				// 가져갈 데이터는 name_give이고 name이라는 변수 가져가라.
+				success: function (response) {
+				    alert(response['msg']);
+				    window.location.reload()
+				}
+			    });
+			}
+
+		    </script>
+		</head>
+
+		<body>
+		    <section class="hero is-warning">
+			<div class="hero-body">
+			    <div class="container center">
+				<h1 class="title">
+				    My Favorite movie star
+				</h1>
+				<h2 class="subtitle">
+				    영화인 랭킹
+				</h2>
+			    </div>
+			</div>
+		    </section>
+		    <div class="star-list" id="star-box">
+		    </div>
+		</body>
+
+		</html>
+      ```
+  
+  </details>
+
+  <details>
+  <summary>결과물 확인하기</summary>
+  
+    - 데이터 불러오기
+  
+      ![스크린샷 2022-10-12 21 06 59](https://user-images.githubusercontent.com/102138834/196372458-1ffa9227-c7c0-4408-a978-01994e7ae27f.png)
+
+    - 좋아요 기능
+    
+      ![스크린샷 2022-10-17 21 58 02](https://user-images.githubusercontent.com/102138834/196372698-3327bef4-369a-40f9-974e-c55ee88b6dd0.png)
+
+    - 영화인 리스트 삭제
+    
+      ![스크린샷 2022-10-17 22 06 29](https://user-images.githubusercontent.com/102138834/196372793-9fd37b3c-8ba8-4051-a039-05add296470c.png)
+
+      ![스크린샷 2022-10-17 22 06 37](https://user-images.githubusercontent.com/102138834/196372833-c237c452-4856-4b50-af24-d9a9a6f90021.png)
+
+  
+  </details>
+
+</details>
