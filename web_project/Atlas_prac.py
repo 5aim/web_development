@@ -4,7 +4,7 @@ import certifi
 ca = certifi.where()
 
 # mongo db Atlas
-client = MongoClient('mongodb+srv://test:sparta@cluster0.6b0cooc.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
+client = MongoClient('', tlsCAFile=ca)
 db = client.sparta
 
 # 저장 - 예시
