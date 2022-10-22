@@ -39,7 +39,3 @@ def web_mars_get():
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
-
-
-# client = pymongo.MongoClient("mongodb+srv://text:<password>@cluster0.ezoan.mongodb.net/?retryWrites=true&w=majority")
-# db = client.test
