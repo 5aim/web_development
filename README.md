@@ -2209,6 +2209,35 @@
 
 </details>
 
+<details>
+<summary>AWS EC2 서버 구매하고 세팅하기</summary>
+
+</details>
+
+
+<details>
+<summary>gavia 도메인 설정</summary>
+
+</details>
+
+
+</br>
+</br>
+
+## 미니프로젝트
+
+- 웹개발 종합반 SUMMARY
+
+  - flask API
+
+  - Mongo DB Atlas & Robo 3T
+
+  - Ajax + jQuery
+  
+  - AWS EC2
+  
+  - bs4 Scrolling
+
 
 <details>
 <summary>'화성땅 공동구매' 미니프로젝트</summary>
@@ -2232,6 +2261,8 @@
   - POST, GET 연습을 통해 코드를 익힌다.
   
     - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - mongo DB Atlas의 사용법에 대해 간단히 익힌다.
   
   </br>  
   <details>
@@ -2352,7 +2383,7 @@
   </details>
   
   <details>
-  <summary>완성</summary>
+  <summary>홈페이지</summary>
   </br>
   
 	![스크린샷 2022-10-22 13 58 58](https://user-images.githubusercontent.com/102138834/197327673-a1800ed4-1619-4612-8633-51280c03ad1a.png)
@@ -2377,6 +2408,8 @@
     - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
     
   - .repeat 에 대한 사용
+  
+  - mongo DB Atlas의 사용법에 대해 간단히 익힌다.
   
   </br>  
   <details>
@@ -2525,12 +2558,359 @@
   </details>
   
   <details>
-  <summary>완성</summary>
+  <summary>홈페이지</summary>
 	</br>
   
 	![스크린샷 2022-10-22 15 04 37](https://user-images.githubusercontent.com/102138834/197328089-38e32526-7faa-42c9-b2fa-84c485c18705.png)
 
   
   </details>
+
+</details>
+
+
+<details>
+<summary>'팬명록' 미니프로젝트</summary>
+
+- 좋아하는 가수의 단순 응원댓글 페이지
+
+- 들어가기 전
+
+  - Ajax와 jQuery의 조합에 대한 복습 반복 연습.
+  
+  - Flask를 통해서 개발 순서 반복 연습.
+    
+  - CR 반복 연습.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - mongo DB Atlas의 사용법에 대해 간단히 익힌다.
+  
+  </br>  
+  <details>
+  <summary>만들 API</summary>
+  
+    - Create : mongoDB Atlas에 데이터들을 POST.
+    
+    - Read : 모든 응원 댓글 정보를 GET.
+  
+  </details>
+  
+  <details>
+  <summary>index.html</summary>
+	</br>
+
+	```html
+	<script>
+	$(document).ready(function(){
+	    set_temp()
+	    show_comment()
+	});
+
+	// 온도 API 불러와서 띄워주기
+	function set_temp(){
+	    $.ajax({
+		type: "GET",
+		url: "http://spartacodingclub.shop/sparta_api/weather/seoul",
+		data: {},
+		success: function (response) {
+		    $('#temp').text(response['temp'])
+		}
+	    })
+	}
+
+	// 댓글 저장하기
+	function save_comment() {
+	    let name = $('#name').val()
+	    let comment = $('#comment').val()
+
+	    $.ajax({
+		type: "POST",
+		url: "/fanboard",
+		data: {'name_give':name, 'comment_give':comment},
+		success: function (response) {
+		    alert(response["msg"])
+		    window.location.reload()
+		}
+	    });
+	}
+
+	// 전체 댓글 보여주기
+	function show_comment() {
+	    $('#comment-list').empty()
+	    $.ajax({
+		type: "GET",
+		url: "/fanboard",
+		data: {},
+		success: function (response) {
+		    let rows = response['comments']
+		    for (let i = 0; i < rows.length; i++) {
+			let name = rows[i]['name']
+			let comment = rows[i]['comment']
+
+			let temp_html = `<div class="card">
+					    <div class="card-body">
+						<blockquote class="blockquote mb-0">
+						    <p>${comment}</p>
+						    <footer class="blockquote-footer">${name}</footer>
+						</blockquote>
+					    </div>
+					</div>`
+			$('#comment-list').append(temp_html)
+		    }
+		}
+	    });
+	}
+	</script>
+	```
+  </details>
+  
+  <details>
+  <summary>app.py</summary>
+	</br>
+	
+	```python
+	from flask import Flask, render_template, request, jsonify
+	from pymongo import MongoClient
+	import certifi
+
+	ca = certifi.where()
+
+	# mongo db Atlas
+	client = MongoClient('', tlsCAFile=ca)
+	db = client.sparta
+
+	app = Flask(__name__)
+
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+	# 댓글 저장하기
+	@app.route("/fanboard", methods=["POST"])
+	def homework_post():
+	    name_receive = request.form["name_give"]
+	    comment_receive = request.form["comment_give"]
+
+	    doc = {
+		'name': name_receive,
+		'comment': comment_receive
+	    }
+
+	    db.fanboard.insert_one(doc)
+	    return jsonify({'msg':'응원완료!'})
+
+	# 전체 댓글 보여주기
+	@app.route("/fanboard", methods=["GET"])
+	def homework_get():
+	    comment_list = list(db.fanboard.find({},{'_id':False}))
+	    return jsonify({'comments':comment_list})
+
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5000, debug=True)
+	```
+  
+  </details>
+  
+  <details>
+  <summary>홈페이지</summary>
+	</br>
+
+	![스크린샷 2022-10-22 15 33 48](https://user-images.githubusercontent.com/102138834/197331684-14049590-0cba-4a67-b2fd-968b124b1d71.png)
+  
+  </details>
+
+</details>
+
+<details>
+<summary>'To do list' 미니프로젝트</summary>
+
+- 간단한 To Do List 페이지 만들기
+
+- 들어가기 전
+
+  - Ajax와 jQuery의 조합에 대한 복습 반복 연습.
+  
+  - Flask를 통해서 개발 순서 반복 연습.
+    
+  - CRU 반복 연습.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - mongo DB Atlas의 사용법에 대해 간단히 익힌다.
+  
+  </br>  
+  <details>
+  <summary>만들 API</summary>
+  
+    - Create : mongoDB Atlas에 To do 데이터들을 POST. (리스트 기록하기)
+    
+    - Read : 모든 To Do List를 GET. (리스트 띄워주기)
+    
+    - Update : To Do List에 대한 완료처리 (리스트 완료처리)
+  
+  </details>
+
+  <details>
+  <summary>index.html</summary>
+	</br>
+
+	```html
+	<script>
+	$(document).ready(function () {
+	    show_todo();
+	});
+
+	// to do list 보여주기
+	function show_todo(){
+	    $.ajax({
+		type: "GET",
+		url: "/todo",
+		data: {},
+		success: function (response) {
+		    let rows = response['todos']
+
+		    for (let i = 0; i < rows.length; i++) {
+			let todo = rows[i]['todo']
+			let num = rows[i]['num']
+			let done = rows[i]['done']
+
+			let temp_html = ``
+			if (done == 0) {
+			    temp_html = `<li>
+					    <h2>✅ ${todo}</h2>
+					    <button onclick="done_todo(${num})" type="button" class="btn btn-outline-primary">완료!</button>
+					</li>`
+			} else {
+			    temp_html = `<li>
+					    <h2 class="done">✅ ${todo}</h2>
+					</li>`
+			}
+			$('#todo-list').append(temp_html)
+		    }
+		}
+	    });
+	}
+
+	// to do list 기록하기
+	function save_todo(){
+	    let todo = $('#todo').val()
+
+	    $.ajax({
+		type: "POST",
+		url: "/todo",
+		data: {todo_give:todo},
+		success: function (response) {
+		    alert(response["msg"])
+		    window.location.reload()
+		}
+	    });
+	}
+
+	// 완료 된 to do list 체크하기
+	function done_todo(num){
+	    $.ajax({
+		type: "POST",
+		url: "/todo/done",
+		data: {num_give:num},
+		success: function (response) {
+		    alert(response["msg"])
+		    window.location.reload()
+		}
+	    });
+	}
+	</script>
+	```
+  
+  </details>
+
+  <details>
+  <summary>app.py</summary>
+	</br>
+
+	```python
+	from flask import Flask, render_template, request, jsonify
+	from pymongo import MongoClient
+	import certifi
+
+	ca = certifi.where()
+
+	# mongo db Atlas
+	client = MongoClient('', tlsCAFile=ca)
+	db = client.sparta
+
+	app = Flask(__name__)
+
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+	# to do list 기록하기
+	@app.route("/todo", methods=["POST"])
+	def todo_post():
+	    todo_receive = request.form['todo_give']
+
+	    # todo_list에 모든 데이터를 받은다음에
+	    todo_list = list(db.todo.find({}, {'_id':False}))
+	    # 받은 길이의 순서대로 +1을 해서 num을 매겨준다.
+	    count = len(todo_list) + 1
+
+	    doc = {
+		'num' : count,
+		'todo' : todo_receive,
+		'done' : 0
+	    }
+
+	    db.todo.insert_one(doc)
+
+	    return jsonify({'msg': 'to do list 등록 완료!'})
+
+	# 완료 to do list 체크하기
+	@app.route("/todo/done", methods=["POST"])
+	def todo_done():
+	    num_receive = request.form['num_give']
+	    db.todo.update_one({'num': int(num_receive)}, {'$set': {'done':1}})
+	    return jsonify({'msg': 'to do 완료!'})
+
+
+
+	# to do list 띄워주기
+	@app.route("/todo", methods=["GET"])
+	def todo_get():
+	    todo_list = list(db.todo.find({}, {'_id':False}))
+	    return jsonify({'todos':todo_list})
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5000, debug=True)
+	```
+  
+  </details>
+  
+  <details>
+  <summary>홈페이지</summary>
+	</br>
+
+	![스크린샷 2022-10-22 16 09 46](https://user-images.githubusercontent.com/102138834/197331950-29598b30-82a5-4cbe-8d7d-d15c18c74f28.png)
+
+	![스크린샷 2022-10-22 16 20 47](https://user-images.githubusercontent.com/102138834/197331956-ecb1a04b-f7c0-4ec9-83ec-9aa7d9873284.png)
+
+  
+  </details>
+
+</details>
+
+
+</br>
+</br>
+</br>
+
+<details>
+<summary>웹개발 종합반 - 이범규 튜터님</summary>
+</br>
+
+![image](https://user-images.githubusercontent.com/102138834/197332515-29e3d491-d1e3-4610-aea4-d16fc64cc6e9.png)
+
+</br>
 
 </details>
