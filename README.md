@@ -1876,6 +1876,8 @@
 <details>
 <summary>'my favorite movie star' 미니 프로젝트</summary>
 
+- 영화인들의 정보를 스크롤링하여 나만의 영화인 홈페이지이다. 좋아요 순으로 정렬하고 영화인을 삭제할 수 있다.
+
 - 들어가기 전
 
   - Ajax와 jQuery의 조합에 대한 Read, Update, Delete를 배운다.
@@ -2201,6 +2203,332 @@
       ![스크린샷 2022-10-17 22 06 29](https://user-images.githubusercontent.com/102138834/196372793-9fd37b3c-8ba8-4051-a039-05add296470c.png)
 
       ![스크린샷 2022-10-17 22 06 37](https://user-images.githubusercontent.com/102138834/196372833-c237c452-4856-4b50-af24-d9a9a6f90021.png)
+
+  
+  </details>
+
+</details>
+
+
+<details>
+<summary>'화성땅 공동구매' 미니프로젝트</summary>
+
+- 화성땅을 공동구매하려는 사람들의 구매 명단을 작성한다. 이름, 주소, 원하는 평수를 선택할 수 있다.
+
+- 들어가기 전
+
+  - Ajax와 jQuery의 조합에 대한 Create, Read를 익힌다.
+  
+  - Flask를 통해서 개발 순서를 머릿속으로 익히고 배운다.
+  
+    - 클라이언트와 서버가 잘 연결되어 있는지 확인하기
+    
+    - 서버 만들기
+    
+    - 클라이언트 만들기
+    
+    - 완성 확인하기
+    
+  - POST, GET 연습을 통해 코드를 익힌다.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+  
+  </br>  
+  <details>
+  <summary>만들 API</summary>
+  
+    - Create : 구매자 이름, 주소, 평수 데이터를 받는다.
+    
+    - Read : 구매자의 모든 데이터를 불러온다.
+  
+  </details>
+  
+  <details>
+  <summary>index.html</summary>
+  	</br>
+	
+	```html
+	<script>
+	$(document).ready(function () {
+	    show_order();
+	});
+
+	function show_order() {
+	    $.ajax({
+		type: 'GET',
+		url: '/mars',
+		data: {},
+		success: function (response) {
+		    let rows = response['orders']
+
+		    for (let i =0; i < rows.length; i++) {
+			let name = rows[i]['name']
+			let address = rows[i]['address']
+			let size = rows[i]['size']
+
+			let temp_html = `<tr>
+					    <td>${name}</td>
+					    <td>${address}</td>
+					    <td>${size}</td>
+					</tr>`
+
+			$('#order-box').append(temp_html)
+		    }
+		}
+	    });
+	}
+
+	function save_order() {
+	    // jQuery로 받아서
+	    let name = $('#name').val()
+	    let address = $('#address').val()
+	    let size = $('#size').val()
+
+	    // 데이터를 보낸다.
+	    $.ajax({
+		type: 'POST',
+		url: '/mars',
+		data: { name_give:name, address_give:address, size_give:size },
+		success: function (response) {
+		    alert(response['msg'])
+		    window.location.reload()
+		}
+	    });
+	}
+	</script>
+	```
+  
+  </details>
+
+
+  <details>
+  <summary>app.py</summary>
+  	</br>
+	
+	```python
+	from flask import Flask, render_template, request, jsonify
+	from pymongo import MongoClient
+	import certifi
+
+	ca = certifi.where()
+
+	# mongo db Atlas
+	client = MongoClient('', tlsCAFile=ca)
+	db = client.sparta
+
+	app = Flask(__name__)
+
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+	# 주문 저장하기
+	@app.route("/mars", methods=["POST"])
+	def web_mars_post():
+	    name_receive = request.form['name_give']
+	    address_receive = request.form['address_give']
+	    size_receive = request.form['size_give']
+
+	    doc = {
+		'name':name_receive,
+		'address':address_receive,
+		'size':size_receive
+	    }
+
+	    db.mars.insert_one(doc)
+
+	    return jsonify({'msg': '주문 완료!'})
+
+	# 주문 보여주기
+	@app.route("/mars", methods=["GET"])
+	def web_mars_get():
+	    order_list = list(db.mars.find({}, {'_id':False}))
+	    return jsonify({'orders':order_list})
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5000, debug=True)
+	```
+
+  </details>
+  
+  <details>
+  <summary>완성</summary>
+  </br>
+  
+	![스크린샷 2022-10-22 13 58 58](https://user-images.githubusercontent.com/102138834/197327673-a1800ed4-1619-4612-8633-51280c03ad1a.png)
+  
+  </details>
+</details>
+
+
+<details>
+<summary>'스파르타피디아' 미니프로젝트</summary>
+
+- 영화 링크를 입력하면 meta태그를 스크래핑해서 나만의 영화 리뷰 페이지를 만든다.
+
+- 들어가기 전
+
+  - Ajax와 jQuery의 조합에 대한 복습 반복 연습.
+  
+  - Flask를 통해서 개발 순서 반복 연습.
+    
+  - CR 반복 연습.
+  
+    - 데이터를 받아서 보내주는 연습과 Json형식으로 GET 리턴하는 연습을 익힌다.
+    
+  - .repeat 에 대한 사용
+  
+  </br>  
+  <details>
+  <summary>만들 API</summary>
+  
+    - Create : meta태그 스크래핑 된 데이터들을 POST.
+    
+    - Read : 모든 포스팅 정보를 GET.
+  
+  </details>
+  
+  <details>
+  <summary>index.html</summary>
+	</br>
+
+	```html
+	<script>
+	$(document).ready(function () {
+	    listing();
+	});
+
+	function listing() {
+	    $.ajax({
+		type: 'GET',
+		url: '/movie',
+		data: {},
+		success: function (response) {
+		    let rows = response['movies']
+
+		    for (let i = 0; i < rows.length; i++) {
+			let title = rows[i]['title']
+			let comment = rows[i]['comment']
+			let desc = rows[i]['desc']
+			let star = rows[i]['star']
+			let image = rows[i]['image']
+
+			let star_image = '⭐️'.repeat(star)
+
+			let temp_html = `<div class="col">
+					    <div class="card h-100">
+						<img src="${image}"
+						    class="card-img-top">
+						<div class="card-body">
+						    <h5 class="card-title">${title}</h5>
+						    <p class="card-text">${desc}</p>
+						    <p>${star_image}</p>
+						    <p class="mycomment">${comment}</p>
+						</div>
+					    </div>
+					</div>`
+			$('#cards-box').append(temp_html)
+		    }
+		}
+	    })
+	}
+
+	function posting() {
+	    let url = $('#url').val()
+	    let star = $('#star').val()
+	    let comment = $('#comment').val()
+
+	    $.ajax({
+		type: 'POST',
+		url: '/movie',
+		data: { url_give:url, star_give:star, comment_give:comment },
+		success: function (response) {
+		    alert(response['msg'])
+		    window.location.reload()
+		}
+	    });
+	}
+
+	function open_box() {
+	    $('#post-box').show()
+	}
+	function close_box() {
+	    $('#post-box').hide()
+	}
+	</script>
+	```
+  
+  </details>
+  
+  
+  <details>
+  <summary>app.py</summary>
+	</br>
+
+	```python
+	from flask import Flask, render_template, request, jsonify
+	from bs4 import BeautifulSoup
+	import requests
+	from bs4 import BeautifulSoup
+	from pymongo import MongoClient
+	import certifi
+
+	ca = certifi.where()
+
+	# mongo db Atlas
+	client = MongoClient('', tlsCAFile=ca)
+	db = client.sparta
+
+	app = Flask(__name__)
+
+	@app.route('/')
+	def home():
+	    return render_template('index.html')
+
+	# 포스팅 기록하기
+	@app.route("/movie", methods=["POST"])
+	def movie_post():
+	    url_receive = request.form['url_give']
+	    star_receive = request.form['star_give']
+	    comment_receive = request.form['comment_give']
+
+	    headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+	    data = requests.get(url_receive,headers=headers)
+
+	    soup = BeautifulSoup(data.text, 'html.parser')
+
+	    title = soup.select_one('meta[property="og:title"]')['content']
+	    image = soup.select_one('meta[property="og:image"]')['content']
+	    desc = soup.select_one('meta[property="og:description"]')['content']
+
+	    doc = {
+		'title':title,
+		'image':image,
+		'desc':desc,
+		'star':star_receive,
+		'comment':comment_receive
+	    }
+	    db.movies.insert_one(doc)
+
+	    return jsonify({'msg':'포스팅 완료!'})
+
+	# 포스팅 불러오기
+	@app.route("/movie", methods=["GET"])
+	def movie_get():
+	    movie_list = list(db.movies.find({}, {'_id':False}))
+	    return jsonify({'movies':movie_list})
+
+	if __name__ == '__main__':
+	    app.run('0.0.0.0', port=5000, debug=True)
+	```
+  
+  </details>
+  
+  <details>
+  <summary>완성</summary>
+	</br>
+  
+	![스크린샷 2022-10-22 15 04 37](https://user-images.githubusercontent.com/102138834/197328089-38e32526-7faa-42c9-b2fa-84c485c18705.png)
 
   
   </details>
